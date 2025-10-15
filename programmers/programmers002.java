@@ -1,6 +1,4 @@
-package algorithm;
-import java.util.*;
-
+package algorithm.programmers;
 
 
 public class programmers002 {
