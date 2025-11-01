@@ -3,97 +3,128 @@ package algorithm.baekjoon;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.StringTokenizer;
 
-public class Baekjoon16234 {
+public class Baekjoon4179 {
 
-    static int N;  //수열의 수
-    static int L;  //수열의 수
-    static int R;  //수열의 수
+
     static int[][] a;
+    static int Y;
+    static int X;
 
-    static boolean[][] visited;
     static final int[] dy = {0, 1, 0, -1};
     static final int[] dx = {1, 0, -1, 0};
-    static int sum;
+
     static int count;
-    static Deque<int[]> dq;
 
 
     public static void main(String[] args) throws IOException {
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+
         StringTokenizer st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken());
-        L = Integer.parseInt(st.nextToken());
-        R = Integer.parseInt(st.nextToken());
-        a = new int[N][N];
 
+        Y = Integer.parseInt(st.nextToken());
+        X = Integer.parseInt(st.nextToken());
 
-        for (int i = 0; i < N; i++) {
-            st = new StringTokenizer(br.readLine());
-            for (int j = 0; j < N; j++) {
-                a[i][j] = Integer.parseInt(st.nextToken());
+        a = new int[Y][X];
+        Deque<int[]> f1 = new ArrayDeque<>();
+        Deque<int[]> f2 = new ArrayDeque<>();
+        Deque<int[]> j1 = new ArrayDeque<>();
+        Deque<int[]> j2 = new ArrayDeque<>();
+
+        for (int i = 0; i < Y; i++) {
+
+            String s = br.readLine();
+
+            for (int j = 0; j < X; j++) {
+
+                char c = s.charAt(j);
+
+                switch (c) {
+                    case '#':
+                        a[i][j] = 1;  //벽은 1
+                        break;
+                    case 'J':
+                        a[i][j] = 2;  //지훈은 2
+                        j1.add(new int[]{i, j});
+                        break;
+                    case 'F':
+                        a[i][j] = 3;  //불은 3
+                        f1.add(new int[]{i, j});
+                        break;
+
+                    default: break;
+                }
+
             }
+
         }
 
-        boolean flag = true;
+        while(true){
+            while (!f1.isEmpty()) {
 
-        while (flag) {
-            flag = false;
-            visited = new boolean[N][N];
+                int[] p = f1.poll();
 
+                int y = p[0];
+                int x = p[1];
 
+                for (int k = 0; k < 4; k++) {
+                    int ny = y + dy[k];
+                    int nx = x + dx[k];
 
-            for (int i = 0; i < N; i++) {
-                for (int j = 0; j < N; j++) {
-                    dq = new ArrayDeque<>();
-                    sum = 0;
-                    if(!visited[i][j]){
-                        dfs(i,j);
-                    }
+                    if (ny < 0 || nx < 0 || ny >= Y || nx >= X) continue;
+                    if (a[ny][nx] == 1 || a[ny][nx] == 3) continue;
 
-                    int size = dq.size();
-
-                    if(size >=2){
-                        flag = true;
-                        int avg = sum / size;
-                        for (int[] yx : dq) {
-                            a[yx[0]][yx[1]] = avg;
-                        }
-                    }
+                    a[ny][nx] = 3;
+                    f2.add(new int[]{ny, nx});
 
                 }
             }
-
-            if(flag) count++;
-        }
-
-
-        System.out.println(count);
-    }
+            if (!f2.isEmpty()) {
+                f1 = new ArrayDeque<>(f2);
+                f2 = new ArrayDeque<>();
+            }
 
 
+            while (!j1.isEmpty()) {
 
-    static void dfs(int y, int x) {
-        dq.add(new int[]{y,x});
-        visited[y][x] = true;
-        sum += a[y][x];
+                int[] p = j1.poll();
 
-        for (int k = 0; k < 4; k++) {
-            int nx = x + dx[k];
-            int ny = y + dy[k];
+                int y = p[0];
+                int x = p[1];
 
-            if (nx < 0 || ny < 0 || nx >= N || ny >= N) continue;
-            if (visited[ny][nx]) continue;
-            // 1. 인구비교
-            int diff = Math.abs(a[y][x] - a[ny][nx]);
-            // 1-1. 인구차이가 L명 이상 R명 이하면 국격선 열기
-            if (L <= diff && diff <= R) {
-                dfs(ny,nx);
+                for (int k = 0; k < 4; k++) {
+                    int ny = y + dy[k];
+                    int nx = x + dx[k];
+
+                    if (ny < 0 || nx < 0 || ny >= Y || nx >= X) {
+                        System.out.println(++count);
+                        return;
+                    }
+                    if (a[ny][nx] != 0 ) continue;
+
+
+                    a[ny][nx] = 2;
+                    j2.add(new int[]{ny, nx});
+                }
+
+            }
+            if (!j2.isEmpty()) {
+                count++;
+                j1 = new ArrayDeque<>(j2);
+                j2 = new ArrayDeque<>();
+            } else {
+                System.out.println("IMPOSSIBLE");
+                return;
             }
         }
-    }
 
+
+
+    }
 
 }
